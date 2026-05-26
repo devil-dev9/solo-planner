@@ -8,6 +8,7 @@
 
   function App() {
     const [state, setState] = useState(H.loadState);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => { H.saveState(state); }, [state]);
 
@@ -16,6 +17,9 @@
       document.body.classList.toggle("dark", !!state.darkMode);
     }, [state.darkMode]);
 
+    // Close mobile menu when navigating
+    useEffect(() => { setMobileMenuOpen(false); }, [state.activeView, state.activePlanId]);
+
     const activePlan = state.plans.find((p) => p.id === state.activePlanId) || state.plans[0];
     const update = useCallback((updater) => setState((s) => updater(s) ?? s), []);
     const mutatePlan = useCallback((planId, mutator) => {
@@ -23,9 +27,20 @@
     }, [update]);
 
     return (
-      <div className="app">
-        <Sidebar state={state} setState={setState} activePlan={activePlan} />
+      <div className={"app " + (mobileMenuOpen ? "menu-open" : "")}>
+        <Sidebar state={state} setState={setState} activePlan={activePlan} onCloseMobile={() => setMobileMenuOpen(false)} />
+        <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
         <main className="main">
+          <div className="mobile-topbar">
+            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="3" y1="6" x2="17" y2="6"/>
+                <line x1="3" y1="10" x2="17" y2="10"/>
+                <line x1="3" y1="14" x2="17" y2="14"/>
+              </svg>
+            </button>
+            <span className="mobile-topbar-title">{activePlan.title}</span>
+          </div>
           <PlanHeader plan={activePlan} mutatePlan={mutatePlan} />
           <ViewTabs activeView={state.activeView} setView={(v) => setState((s) => ({ ...s, activeView: v }))} plan={activePlan} />
           {state.activeView === "today" && <V.TodayView plan={activePlan} mutatePlan={mutatePlan} state={state} setState={setState} />}
@@ -44,7 +59,7 @@
     );
   }
 
-  function Sidebar({ state, setState, activePlan }) {
+  function Sidebar({ state, setState, activePlan, onCloseMobile }) {
     const [adding, setAdding] = useState(false);
     const [newTitle, setNewTitle] = useState("");
 
@@ -83,6 +98,12 @@
             <div className="brand-title">Planner</div>
             <div className="brand-sub">& Tracker</div>
           </div>
+          <button className="mobile-close-btn" onClick={onCloseMobile} aria-label="Close menu">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="5" y1="5" x2="15" y2="15"/>
+              <line x1="15" y1="5" x2="5" y2="15"/>
+            </svg>
+          </button>
           <button className="dark-toggle" onClick={toggleDark} title={state.darkMode ? "Switch to light mode" : "Switch to dark mode"}>
             {state.darkMode ? (
               <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">

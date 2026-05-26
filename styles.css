@@ -1949,6 +1949,12 @@ input {
   border-left: 3px solid oklch(0.55 0.13 280);
 }
 
+/* ─── Mobile top bar + drawer (defaults hidden on desktop) ─── */
+
+.mobile-topbar { display: none; }
+.mobile-overlay { display: none; }
+.mobile-close-btn { display: none; }
+
 /* Responsive */
 @media (max-width: 980px) {
   .app { grid-template-columns: 220px 1fr; }
@@ -1958,12 +1964,174 @@ input {
 }
 
 @media (max-width: 640px) {
+  /* Single-column layout */
   .app { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+
+  /* Sidebar becomes a slide-out drawer */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 84vw;
+    max-width: 320px;
+    z-index: 100;
+    transform: translateX(-105%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 24px -4px oklch(0.10 0 0 / 0.25);
+    padding-top: 14px;
+  }
+
+  .app.menu-open .sidebar { transform: translateX(0); }
+
+  /* Dim backdrop when drawer open */
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: oklch(0.10 0 0 / 0);
+    z-index: 90;
+    pointer-events: none;
+    transition: background 0.25s ease;
+  }
+
+  .app.menu-open .mobile-overlay {
+    background: oklch(0.10 0 0 / 0.4);
+    pointer-events: auto;
+  }
+
+  /* Mobile top bar */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--fg);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .mobile-topbar-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--fg);
+  }
+
+  /* Sidebar close button — only shown on mobile */
+  .mobile-close-btn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--fg-muted);
+    flex-shrink: 0;
+  }
+
+  /* Plan header tighter */
+  .plan-header {
+    padding: 16px 16px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
   .plan-title { font-size: 22px; }
-  .data-header { flex-direction: column; align-items: stretch; }
-  .data-header-right { flex-wrap: wrap; }
+  .plan-sub { font-size: 13px; }
+
+  .plan-header-right {
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .stat-num { font-size: 18px; }
+  .ring-wrap, .ring-wrap svg { width: 56px; height: 56px; }
+
+  /* View tabs */
+  .view-tabs { padding: 10px 16px 0; gap: 2px; }
+  .view-tab { padding: 10px 12px; font-size: 13px; }
+
+  /* Reduced side padding */
+  .timeline, .today, .metrics-view, .data-view {
+    padding: 18px 16px 80px;
+  }
+
+  /* Today stats 2x2 */
+  .today-stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ts-stat { padding: 12px 14px; }
+  .ts-val { font-size: 20px; }
+
+  /* Today nav */
+  .today-nav { gap: 12px; margin-bottom: 16px; }
+  .nav-arrow { width: 36px; height: 36px; font-size: 18px; }
+  .today-title { font-size: 22px; }
+
+  /* Goals stack */
+  .goal-grid { grid-template-columns: 1fr; gap: 12px; }
+  .goal-card { padding: 16px; }
+
+  /* Data views */
+  .data-header { flex-direction: column; align-items: stretch; gap: 10px; }
+  .data-header-right { flex-wrap: wrap; gap: 6px; }
+  .data-header-right .search-input { flex: 1 1 100%; min-width: 0; }
   .data-card-fields { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; gap: 8px; }
+  .field.wide { grid-column: span 1; }
+
+  /* Card grid 1-col */
+  .card-grid { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Data tables scroll horizontally */
+  .data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table { min-width: 560px; }
+
+  /* Day grid stacks */
+  .day-grid { grid-template-columns: 1fr; }
+
+  /* Habits tighter */
+  .habits-head { grid-template-columns: 1fr 154px 50px; padding: 8px 12px; }
+  .habits-row { grid-template-columns: 1fr 154px 50px; padding: 10px 12px; }
+  .habits-head-days, .habits-row-days { gap: 2px; }
+  .habit-dot { width: 20px; height: 20px; border-radius: 5px; }
+  .habits-day-label { width: 20px; font-size: 8px; }
+  .habits-row-name { font-size: 13px; padding-right: 8px; }
+
+  /* Notes textarea */
+  .notes-textarea { min-height: 420px; font-size: 14px; padding: 16px; }
+
+  /* Metrics 1-col */
+  .metric-grid { grid-template-columns: 1fr; }
+
+  /* Funnel */
+  .funnel-row { grid-template-columns: 96px 1fr 32px; gap: 8px; }
+  .funnel-label { font-size: 11px; }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .today-stats-row { grid-template-columns: 1fr; }
+  .view-tab { padding: 9px 10px; font-size: 12px; }
 }
 
 /* ─── Dark mode toggle ─── */
